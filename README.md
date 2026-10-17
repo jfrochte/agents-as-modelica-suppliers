@@ -1,9 +1,10 @@
 # Agents as Modelica Suppliers
 
-Acceptance tests for Modelica models of physical systems, and five tasks to
-try them on: a carriage on a spring, a sled with dry friction, a DC motor
-driving a flywheel, a battery-powered drive train, and a switching magnet
-measured in the laboratory.
+A setup for commissioning LLM agents to build Modelica models of physical
+systems, and acceptance tests for what they, or any other supplier, deliver.
+Five tasks come with it: a carriage on a spring, a sled with dry friction, a
+DC motor driving a flywheel, a battery-powered drive train, and a switching
+magnet measured in the laboratory.
 
 When an engineering office, a student or an LLM agent delivers a model of a
 device, the usual check is whether it reproduces the measurements. That is
