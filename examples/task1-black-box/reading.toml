@@ -1,0 +1,10 @@
+# The client's reading of this model (acceptance/README.md).
+
+[conformance]
+verdict = "not conformant"
+reason = "the dynamics is a Modelica.Blocks.Continuous.StateSpace block; the task admits components of Modelica.Mechanics.Translational only and excludes state-space blocks"
+
+[parameters]
+m = { read = "no counterpart: the coefficients of the state-space matrices belong to no component" }
+c = { read = "no counterpart: the coefficients of the state-space matrices belong to no component" }
+d = { read = "no counterpart: the coefficients of the state-space matrices belong to no component" }

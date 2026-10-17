@@ -1,0 +1,3 @@
+numpy>=2.0
+OMPython==4.0.1
+scipy  # not used by the acceptance; the agent's environment in src/ has it, as in the study

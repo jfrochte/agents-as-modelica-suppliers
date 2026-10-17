@@ -1,0 +1,24 @@
+# AppArmor profile that lets bubblewrap create user namespaces.
+#
+# Ubuntu 24.04 blocks unprivileged user namespaces for all programs
+# (kernel.apparmor_restrict_unprivileged_userns=1). This profile lifts the
+# block for bwrap alone instead of switching it off for the whole system, so
+# that src/commission.py runs without sudo.
+#
+# Install once:
+#   sudo cp src/apparmor-bwrap /etc/apparmor.d/bwrap
+#   sudo apparmor_parser -r /etc/apparmor.d/bwrap
+#
+# Check:
+#   bwrap --dev-bind / / true && echo ok
+#
+# Remove:
+#   sudo rm /etc/apparmor.d/bwrap && sudo systemctl reload apparmor
+
+abi <abi/4.0>,
+include <tunables/global>
+
+profile bwrap /usr/bin/bwrap flags=(unconfined) {
+  userns,
+  include if exists <local/bwrap>
+}

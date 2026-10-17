@@ -1,0 +1,20 @@
+# The client's reading of this delivery (acceptance/README.md).
+
+[conformance]
+verdict = "conformant"
+reason = "built from Electrical.Analog and Mechanics.Rotational components inside the classes BatteryPack and DCMachine; the converter is rebuilt from a SignalVoltage and a Torque source, driven through Blocks.Math.Gain from the speed and the current"
+
+[parameters]
+R = { value = 0.268464, read = "battery.R_int + machine.R = 0.10 + 0.168464 (series resistances)" }
+L_a = { value = 0.0224326, read = "parameter L, bound to machine.lArm.L" }
+k = { read = "no counterpart: the model declares a back-EMF constant ke = 0.614163 and a torque constant kt = 1.15782 as two independent parameters, where the reference has one" }
+J_eq = { value = 0.191812, read = "parameter J, the total inertia referred to the motor shaft, bound to machine.rotor.J" }
+d_eq = { read = "no counterpart: the model dissipates through dry friction at the motor shaft (friction.tau_nominal = -F0, F0 = 3.32679 N.m), not through viscous damping" }
+
+# The converter is rebuilt from sources, so its variables are named here.
+[[invariant.converter]]
+voltage = "machine.emf.v"
+current = "machine.emf.i"
+torque = "machine.motorTorque.tau"
+speed = "machine.wSens.w"
+read = "back EMF as a voltage source driven by ke times the speed, torque source driven by kt times the current"

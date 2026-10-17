@@ -1,0 +1,128 @@
+# Task 2: a sled on a rail, connected to the frame by a springy element.
+# Pushed, it swings back and forth a few times and then stops. Only the
+# position of the sled is measured.
+#
+# This file describes the experiments of the task for the acceptance
+# (acceptance/bench.py). The measured traces are in data/<experiment>.csv.
+
+name = "task2"
+
+# Name of the model input. The delivered model declares it as
+# Modelica.Blocks.Interfaces.RealInput; here it is the force on the sled in N.
+input = "u"
+
+# Measured outputs, declared as Modelica.Blocks.Interfaces.RealOutput in the
+# delivered model, with the standard deviation of the additive Gaussian sensor
+# noise. The task text states the same value to the agent. There is no
+# velocity measurement in this task.
+[outputs]
+y_s = { unit = "m", noise = 2e-3 }     # position of the sled
+
+# Each experiment starts at rest at position zero and runs for stop_time
+# seconds. The simulation reports the outputs on `intervals` equal intervals,
+# the grid on which the data were sampled (0.05 s). `source` declares the
+# signal source in Modelica, and `signal` is the source output that the bench
+# connects to the model input. The role says whether the agent may fit on the
+# experiment ("fit") or may only report its error on it ("validation").
+
+[experiments.exp1_fit]            # force pulse of 8 N for 0.5 s from t = 1 s
+role = "fit"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Pulse stimulus(amplitude=8, width=0.05, period=1000, startTime=1);"]
+signal = "stimulus.y"
+
+[experiments.exp2_fit]            # small force step of 0.5 N at t = 1 s
+role = "fit"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Step stimulus(height=0.5, startTime=1);"]
+signal = "stimulus.y"
+
+[experiments.exp3_fit]            # larger force step of 3 N at t = 1 s
+role = "fit"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Step stimulus(height=3, startTime=1);"]
+signal = "stimulus.y"
+
+[experiments.exp4_validation]     # sinusoidal force, 4 N at 0.25 Hz from t = 1 s
+role = "validation"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Sine stimulus(amplitude=4, f=0.25, startTime=1);"]
+signal = "stimulus.y"
+
+# Test experiments. The agent never receives them; the client simulates
+# them to check a delivery beyond the experiments it was given. They stay
+# within the range of amplitudes and frequencies of the issued experiments,
+# and their data were simulated from the reference model with the noise
+# above, like the issued ones. The four tables were drawn at random from a
+# fixed seed and frozen before any delivery was simulated on them.
+
+[experiments.test_trapezoid]      # two trapezoidal pulses
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Trapezoid stimulus(amplitude=3, rising=2, width=4, falling=2, period=12, nperiod=2, startTime=1);"]
+signal = "stimulus.y"
+
+[experiments.test_steps]            # six steps to levels drawn at random within the issued range
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_steps_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_ramps]            # eight ramps between levels drawn at random within the issued range
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_ramps_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_chirp]            # linear chirp across the issued frequency band
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_chirp_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_twotone]          # sum of two sines at frequencies drawn at random within the issued band
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_twotone_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+# Quantities that the delivered model has to carry, with the values of the
+# reference model that generated the data, for the parameter layer
+# (acceptance/parameters.py). `tolerance` is relative. It is five per cent,
+# because dry friction varies between batches and surfaces, and a model on five
+# per cent is as good as the friction of a real sled is known.
+[parameters]
+m = { unit = "kg", reference = 1.5, tolerance = 0.05 }       # mass of the sled
+c = { unit = "N/m", reference = 5.0, tolerance = 0.05 }      # spring constant
+F_C = { unit = "N", reference = 0.6, tolerance = 0.05 }      # Coulomb friction force
+d = { unit = "N.s/m", reference = 0.3, tolerance = 0.05 }    # viscous friction constant
+
+# Variants of the device for the variant test (acceptance/variants.py). Each
+# variant raises one listed quantity by half. Its data, in
+# data/variant_<name>_<experiment>.csv, were simulated from the reference
+# model with that change and the noise above, on the issued experiments and
+# on two of the test experiments. `carriers` names the parameters of library
+# components that carry the quantity in a delivered model; the test raises
+# each of them that the model contains by the same factor.
+[variants.mass]
+quantity = "m"
+factor = 1.5
+carriers = ["Modelica.Mechanics.Translational.Components.Mass.m",
+            "Modelica.Mechanics.Translational.Components.MassWithStopAndFriction.m"]
+experiments = ["exp1_fit", "exp2_fit", "exp3_fit", "exp4_validation", "test_trapezoid", "test_chirp"]
+
+[variants.spring]
+quantity = "c"
+factor = 1.5
+carriers = ["Modelica.Mechanics.Translational.Components.Spring.c",
+            "Modelica.Mechanics.Translational.Components.SpringDamper.c"]
+experiments = ["exp1_fit", "exp2_fit", "exp3_fit", "exp4_validation", "test_trapezoid", "test_chirp"]

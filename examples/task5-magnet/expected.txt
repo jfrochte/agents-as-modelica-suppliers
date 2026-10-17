@@ -1,0 +1,22 @@
+task task5, class SwitchingMagnet.FlatArmatureMagnet
+V1 compiler: passed
+V1 reading:  conformant
+V2 parameters: passes
+    N      131          0 % from the reference, at most 1 %: passes
+    c      785.4        0 % from the reference, at most 1 %: passes
+    m      0.0195979    0 % beyond the band, at most 5 %: passes
+    R      0.793118     0 % beyond the band, at most 5 %: passes
+V3 features: 9 graded, 0 missed, 0 undetermined: passes
+    exp1_fit         closing_time           +5.1 %  tolerance 20 %  met
+    exp2_fit         closing_time           +0.0 %  tolerance 20 %  met
+    exp3_validation  closing_time           +5.7 %  tolerance 20 %  met
+    exp2_fit         release_time           -1.2 %  tolerance 25 %  met
+    exp3_validation  release_time           +9.1 %  tolerance 25 %  met
+    exp1_fit         plateau_current        -3.4 %  tolerance  5 %  met
+    exp1_fit         peak_closing_speed     +1.1 %  tolerance 30 %  met
+    exp2_fit         peak_closing_speed     -8.0 %  tolerance 30 %  met
+    exp3_validation  peak_closing_speed     +3.3 %  tolerance 30 %  met
+    for comparison, not part of the verdict: worst residual ratio 3.235 on y_i in exp3_validation
+report check: a value is not named in the report; consistent
+    m = 0.0195979 is not named in the report
+solved: True

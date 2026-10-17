@@ -1,0 +1,15 @@
+task task4, class DriveTrainRig
+V1 compiler: passed
+V1 reading:  conformant
+V2 parameters: undecided
+    R      0.268464     46.3 % from the reference, at most 5 %: fails
+    L_a    0.0224326    46.6 % from the reference, at most 5 %: fails
+    k      no counterpart in the model
+    J_eq   0.191812     0.155 % from the reference, at most 5 %: passes
+    d_eq   no counterpart in the model
+V3 worst ratio 1.029 on y_i in exp3_fit: passes the gate 1.414
+V4 invariant on exp1_fit: fails
+    rebuilt                  P_mech/P_el = 1.8852, 32.9 kJ in, 62.1 kJ out: fails
+test experiments: pass, worst ratio 1.048 on y_w in test_twotone
+report check: every value is named; consistent
+solved: True

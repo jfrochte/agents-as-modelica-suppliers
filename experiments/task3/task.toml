@@ -1,0 +1,148 @@
+# Task 3: an electric drive that spins a flywheel. With a supply voltage
+# applied, the wheel speeds up and settles at a steady speed; with the voltage
+# removed, it slows down again. Measured are the motor current and the
+# rotational speed of the wheel.
+#
+# This file describes the experiments of the task for the acceptance
+# (acceptance/bench.py). The measured traces are in data/<experiment>.csv.
+
+name = "task3"
+
+# Name of the model input. The delivered model declares it as
+# Modelica.Blocks.Interfaces.RealInput; here it is the supply voltage in V.
+input = "u"
+
+# Measured outputs, declared as Modelica.Blocks.Interfaces.RealOutput in the
+# delivered model, with the standard deviation of the additive Gaussian sensor
+# noise. The task text states the same values to the agent.
+[outputs]
+y_i = { unit = "A", noise = 0.01 }       # motor current
+y_w = { unit = "rad/s", noise = 0.05 }   # rotational speed of the wheel
+
+# Each experiment starts at standstill and runs for stop_time seconds. The
+# simulation reports the outputs on `intervals` equal intervals, the grid on
+# which the data were sampled (0.05 s). `source` declares the signal source in
+# Modelica, and `signal` is the source output that the bench connects to the
+# model input. A source built from several blocks lists all of them in
+# `source` and connects them in `wiring`. The role says whether the agent may
+# fit on the experiment ("fit") or may only report its error on it
+# ("validation").
+#
+# The voltage steps fall between two sampling instants, so that no sample
+# lands exactly on a switching instant.
+
+[experiments.exp1_fit]            # voltage step of 12 V at t = 1.013 s
+role = "fit"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Step stimulus(height=12, startTime=1.013);"]
+signal = "stimulus.y"
+
+[experiments.exp2_fit]            # voltage step of 6 V at t = 1.013 s, back to 0 V at t = 12.017 s
+role = "fit"
+stop_time = 25.0
+intervals = 500
+source = [
+  "Modelica.Blocks.Sources.Step s1(height=6, startTime=1.013);",
+  "Modelica.Blocks.Sources.Step s2(height=-6, startTime=12.017);",
+  "Modelica.Blocks.Math.Add add;",
+]
+wiring = ["connect(s1.y, add.u1);", "connect(s2.y, add.u2);"]
+signal = "add.y"
+
+[experiments.exp3_fit]            # slow sinusoidal voltage, 8 V at 0.2 Hz from t = 1 s
+role = "fit"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Sine stimulus(amplitude=8, f=0.2, startTime=1);"]
+signal = "stimulus.y"
+
+[experiments.exp4_validation]     # faster sinusoidal voltage, 10 V at 1 Hz from t = 1 s
+role = "validation"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Sine stimulus(amplitude=10, f=1, startTime=1);"]
+signal = "stimulus.y"
+
+# Test experiments. The agent never receives them; the client simulates
+# them to check a delivery beyond the experiments it was given. They stay
+# within the range of amplitudes and frequencies of the issued experiments,
+# and their data were simulated from the reference model with the noise
+# above, like the issued ones. The four tables were drawn at random from a
+# fixed seed and frozen before any delivery was simulated on them.
+
+[experiments.test_trapezoid]      # two trapezoidal pulses
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ["Modelica.Blocks.Sources.Trapezoid stimulus(amplitude=10, rising=2, width=5, falling=2, period=12, nperiod=2, startTime=1.013);"]
+signal = "stimulus.y"
+
+[experiments.test_steps]            # six steps to levels drawn at random within the issued range
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_steps_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_ramps]            # eight ramps between levels drawn at random within the issued range
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_ramps_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_chirp]            # linear chirp across the issued frequency band
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_chirp_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_twotone]          # sum of two sines at frequencies drawn at random within the issued band
+role = "test"
+stop_time = 25.0
+intervals = 500
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_twotone_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+# Quantities that the delivered model has to carry, with the values of the
+# reference model that generated the data, for the parameter layer
+# (acceptance/parameters.py). `tolerance` is relative: two per cent, since the
+# torque constant, the inertia and the bearing friction enter the speed
+# directly, and five per cent on the resistance, since the resistance of a
+# copper winding rises by about 0.4 per cent per kelvin, so that a warm motor
+# alone differs by several per cent. The inductance is weakly identifiable by
+# design (electrical time constant 0.5 ms) and is graded by a factor instead.
+[parameters]
+R = { unit = "Ohm", reference = 2.0, tolerance = 0.05 }        # armature resistance
+k = { unit = "N.m/A", reference = 0.1, tolerance = 0.02 }      # torque constant
+J = { unit = "kg.m2", reference = 2e-3, tolerance = 0.02 }     # inertia of rotor and wheel
+d = { unit = "N.m.s/rad", reference = 5e-4, tolerance = 0.02 } # viscous bearing friction
+L = { unit = "H", reference = 1e-3, factor = 3.0 }             # armature inductance
+
+# The invariant layer (acceptance/invariant.py) checks the power balance at the
+# electromechanical converter on this experiment.
+[invariant]
+experiment = "exp1_fit"
+
+# Variants of the device for the variant test (acceptance/variants.py). Each
+# variant raises one listed quantity by half. Its data, in
+# data/variant_<name>_<experiment>.csv, were simulated from the reference
+# model with that change and the noise above, on the issued experiments and
+# on two of the test experiments. `carriers` names the parameters of library
+# components that carry the quantity in a delivered model; the test raises
+# each of them that the model contains by the same factor.
+[variants.inertia]
+quantity = "J"
+factor = 1.5
+carriers = ["Modelica.Mechanics.Rotational.Components.Inertia.J",
+            "Modelica.Electrical.Machines.BasicMachines.DCMachines.DC_PermanentMagnet.Jr"]
+experiments = ["exp1_fit", "exp2_fit", "exp3_fit", "exp4_validation", "test_trapezoid", "test_chirp"]
+
+[variants.resistance]
+quantity = "R"
+factor = 1.5
+carriers = ["Modelica.Electrical.Analog.Basic.Resistor.R",
+            "Modelica.Electrical.Machines.BasicMachines.DCMachines.DC_PermanentMagnet.Ra"]
+experiments = ["exp1_fit", "exp2_fit", "exp3_fit", "exp4_validation", "test_trapezoid", "test_chirp"]

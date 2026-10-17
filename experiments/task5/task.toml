@@ -1,0 +1,97 @@
+# Task 5: a switching magnet with a flat armature, measured in the laboratory.
+# A coil in a yoke pulls the armature across a working air gap of about
+# 0.53 mm against a return spring. Measured are the coil current, the air gap
+# and the speed of the armature; the input is the measured coil voltage.
+#
+# Unlike tasks 1 to 4, the data come from a real device, not from a simulated
+# reference, and there is no reference model. This file describes the
+# experiments for the acceptance (acceptance/bench.py). The measured traces are
+# in data/<experiment>.csv, with the time counted from the first sample.
+
+name = "task5"
+
+# Name of the model input. The delivered model declares it as
+# Modelica.Blocks.Interfaces.RealInput; here it is the coil voltage in V.
+input = "u"
+
+# The behaviour layer is the list of nine features in acceptance/features.py,
+# not the residual gate of the synthetic tasks. The features, their
+# tolerances and the rules by which they are read from a trace are kept in
+# that module, as the gate of the synthetic tasks is kept in behaviour.py:
+# they are the acceptance's criterion, while this file describes the
+# experiments and their data.
+behaviour = "features"
+
+# Files the supplier receives besides the data of the fitting and validation
+# experiments (src/commission.py): the component characteristics.
+supplied = ["static_force_*A.csv", "material_BH.csv"]
+
+# Measured outputs, declared as Modelica.Blocks.Interfaces.RealOutput in the
+# delivered model.
+#
+# residual_scale is not sensor noise. The sensor noise at rest lies below
+# 1 micrometre, 1 mm/s and 10 mA, far below what a lumped network of a real
+# magnet can reach. Residuals are therefore expressed against a declared
+# scale: the root-mean-square error that switching instants misplaced by
+# 0.1 ms produce over an experiment. For the gap, a stroke of 0.53 mm with
+# two edges in 50 ms gives 0.53 mm * sqrt(2 * 0.1 / 50), about 33 micrometres.
+# The ratios are reported beside the features for comparison and do not
+# decide the behaviour layer.
+[outputs]
+y_i = { unit = "A", residual_scale = 0.2 }       # coil current
+y_x = { unit = "m", residual_scale = 33e-6 }     # working air gap, 0 when closed, about 0.53 mm when open
+y_v = { unit = "m/s", residual_scale = 0.06 }    # armature speed, d(y_x)/dt, negative while closing
+
+# Each experiment starts with the armature open and at rest and runs for
+# stop_time seconds, slightly past the last sample. The simulation reports the
+# outputs on `intervals` equal intervals, a grid finer than the sampling of
+# the data (0.1 ms in exp1_fit, 20 microseconds in the others); the
+# acceptance interpolates the simulated traces onto the sampling instants.
+#
+# The source is the measured coil voltage, read from the table
+# data/<experiment>_u.txt and interpolated linearly between its samples; after
+# the last sample the table holds its last value, and it keeps the default of
+# CombiTimeTable, a time event at every sample. {data} stands for the task's
+# data directory and is replaced by its absolute path when the task is
+# loaded. The tables hold the same instants and voltages as the columns time
+# and u of the data files, both taken from the same recording; the tables
+# keep one more significant digit (eight instead of seven), so they are not
+# derived from the CSV files. The role says whether the agent may fit on the
+# experiment ("fit") or may only report its error on it ("validation").
+
+[experiments.exp1_fit]            # voltage-controlled: 6 V, then a low holding voltage, then off
+role = "fit"
+stop_time = 0.1025
+intervals = 2050
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/exp1_fit_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.exp2_fit]            # current-controlled: a pulse of 4 A from the amplifier
+role = "fit"
+stop_time = 0.0505
+intervals = 5050
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/exp2_fit_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.exp3_validation]     # current-controlled: a pulse of 8 A from the amplifier
+role = "validation"
+stop_time = 0.0505
+intervals = 5050
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/exp3_validation_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+# Quantities that the delivered model has to carry, for the parameter layer
+# (acceptance/parameters.py). There is no reference model, so the values are
+# the stated and measured values of the device. The number of turns and the
+# spring constant are stated in the task text; `tolerance` is relative and one
+# per cent. Moving mass and coil resistance are bands. The mass lies between
+# the armature alone, 18.6 g, and the armature with the whole spring, 21.2 g,
+# since the share of the spring that moves with the armature was not measured.
+# The resistance of the warm coil, read from the current plateaus of the
+# experiments, lies between 0.78 and 0.80 Ohm. On both bands, `tolerance` is
+# the admitted distance beyond the nearer edge, relative to it: five per cent.
+[parameters]
+N = { unit = "1", reference = 131, tolerance = 0.01 }              # number of turns
+c = { unit = "N/m", reference = 785.4, tolerance = 0.01 }          # spring constant
+m = { unit = "kg", band = [0.0186, 0.0212], tolerance = 0.05 }     # moving mass
+R = { unit = "Ohm", band = [0.78, 0.80], tolerance = 0.05 }        # coil resistance

@@ -1,0 +1,11 @@
+# The client's reading of this delivery (acceptance/README.md).
+
+[conformance]
+verdict = "conformant"
+reason = "built from Translational components (Mass, SupportFriction, SpringDamper, Fixed, Force, PositionSensor); the friction curve f_pos is a parameter of SupportFriction, constant at f_slide, not a table block"
+
+[parameters]
+m = { value = 1.500289283, read = "parameter m, bound to sledMass.m" }
+c = { value = 5.000195346, read = "parameter c, bound to springDamper.c" }
+F_C = { value = 0.599753559, read = "parameter f_slide, the sliding friction force in railFriction.f_pos" }
+d = { value = 0.3003352219, read = "parameter d, bound to springDamper.d" }

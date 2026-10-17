@@ -1,0 +1,14 @@
+# The client's reading of this delivery (acceptance/README.md).
+
+[conformance]
+verdict = "conformant"
+reason = "built from Translational components (Fixed, SpringDamper, Mass, Force, PositionSensor, SpeedSensor), with Blocks.Interfaces for the input and the outputs"
+
+[parameters]
+m = { value = 1.999869, read = "parameter m, bound to carriage.m" }
+c = { value = 7.997732, read = "parameter c, bound to elasticElement.c" }
+d = { value = 0.800783, read = "parameter d, bound to elasticElement.d" }
+
+[report]
+verdict = "consistent"
+reason = "report.md states m = 1.999869, c = 7.997732, d = 0.800783 as the fitted values; the file carries them"

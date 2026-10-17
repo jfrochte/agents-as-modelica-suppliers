@@ -1,0 +1,14 @@
+# The client's reading of this delivery (acceptance/README.md).
+
+[conformance]
+verdict = "conformant"
+reason = "built from Translational components (Mass, Spring, Damper, Fixed, Force, PositionSensor, SpeedSensor), with Blocks.Interfaces for the input and the outputs"
+
+[parameters]
+m = { value = 1.0, read = "parameter m = 1, bound to carriage.m" }
+c = { value = 1.0, read = "parameter c = 1, bound to spring.c" }
+d = { value = 0.0, read = "parameter d = 0, bound to damper.d" }
+
+[report]
+verdict = "not consistent"
+reason = "report.md lists m = 1.999869, c = 7.997732, d = 0.800783 as the fitted values; the file still declares m = 1, c = 1, d = 0, so the result of the calibration never reached it"

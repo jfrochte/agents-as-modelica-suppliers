@@ -1,0 +1,14 @@
+task task1, class Carriage
+V1 compiler: passed
+V1 reading:  conformant
+V2 parameters: passes
+    m      1.99987      0.00655 % from the reference, at most 1 %: passes
+    c      7.99773      0.0283 % from the reference, at most 1 %: passes
+    d      0.800783     0.0979 % from the reference, at most 1 %: passes
+V3 worst ratio 1.121 on y_s in exp3_validation: passes the gate 1.414
+test experiments: pass, worst ratio 1.053 on y_s in test_steps
+variant test: pass
+    mass        m x 1.5 at m (carriage.m): worst ratio 1.090 on y_v in exp3_validation: passes
+    spring      c x 1.5 at c (elasticElement.c): worst ratio 1.050 on y_v in exp1_fit: passes
+report check: every value is named; consistent
+solved: True

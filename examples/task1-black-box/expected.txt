@@ -1,0 +1,13 @@
+task task1, class LinearBlackBox
+V1 compiler: passed
+V1 reading:  not conformant
+V2 parameters: undecided (not awarded without V1)
+    m      no counterpart in the model
+    c      no counterpart in the model
+    d      no counterpart in the model
+V3 worst ratio 1.148 on y_s in exp3_validation: passes the gate 1.414 (not awarded without V1)
+test experiments: pass, worst ratio 1.056 on y_s in test_steps (not awarded without V1)
+variant test: undecided (not awarded without V1)
+    mass        m x 1.5: no carrier of m found; a reading names the parameters to raise with `at`
+    spring      c x 1.5: no carrier of c found; a reading names the parameters to raise with `at`
+solved: False

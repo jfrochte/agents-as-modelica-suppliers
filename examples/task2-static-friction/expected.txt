@@ -1,0 +1,15 @@
+task task2, class Sled
+V1 compiler: passed
+V1 reading:  conformant
+V2 parameters: passes
+    m      1.50029      0.0193 % from the reference, at most 5 %: passes
+    c      5.0002       0.00391 % from the reference, at most 5 %: passes
+    F_C    0.599754     0.0411 % from the reference, at most 5 %: passes
+    d      0.300335     0.112 % from the reference, at most 5 %: passes
+V3 worst ratio 1.145 on y_s in exp4_validation: passes the gate 1.414
+test experiments: fail, worst ratio 2.248 on y_s in test_steps
+variant test: fail
+    mass        m x 1.5 at m (sledMass.m): worst ratio 1.541 on y_s in exp4_validation: fails
+    spring      c x 1.5 at c (springDamper.c): worst ratio 1.114 on y_s in test_trapezoid: passes
+report check: every value is named; consistent
+solved: True

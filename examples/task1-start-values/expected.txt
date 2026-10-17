@@ -1,0 +1,14 @@
+task task1, class Carriage
+V1 compiler: passed
+V1 reading:  conformant
+V2 parameters: fails
+    m      1            50 % from the reference, at most 1 %: fails
+    c      1            87.5 % from the reference, at most 1 %: fails
+    d      0            100 % from the reference, at most 1 %: fails
+V3 worst ratio 750.789 on y_s in exp2_fit: fails the gate 1.414
+test experiments: fail, worst ratio 2356.872 on y_s in test_chirp
+variant test: fail
+    mass        m x 1.5 at m (carriage.m): worst ratio 1821.289 on y_s in test_chirp: fails
+    spring      c x 1.5 at c (spring.c): worst ratio 1768.958 on y_s in test_chirp: fails
+report check: only round values; not consistent
+solved: False

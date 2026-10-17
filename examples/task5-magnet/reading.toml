@@ -1,0 +1,15 @@
+# The client's reading of this delivery (acceptance/README.md).
+
+[conformance]
+verdict = "conformant"
+reason = "magnetic circuit from FluxTubes shapes, leakage, eddy current and the electromagnetic converter; armature from a Translational Mass, Spring, Damper and two ElastoGap end stops; coil from Electrical.Analog; the magnetisation curve is a FluxTubes material record fitted to material_BH.csv, not a table"
+
+[parameters]
+N = { value = 131, read = "parameter N, bound to coil.N" }
+c = { value = 785.4, read = "parameter c_spring, bound to spring.c" }
+m = { value = 0.0195979, read = "parameter m_arm, bound to armature.m" }
+R = { value = 0.793118, read = "parameter R_coil, bound to r_c.R" }
+
+[report]
+verdict = "consistent"
+reason = "report.md states m_arm = 19.598 g, which the file carries as 0.0195979 kg; the automatic part does not convert grams to kilograms. The other values are named as they stand in the file"

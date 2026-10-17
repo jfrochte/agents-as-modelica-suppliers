@@ -1,0 +1,120 @@
+# Task 4: a test rig for a battery-powered drive train. A battery pack feeds a
+# direct current machine, the machine drives a load through a fixed reduction
+# stage, and the load is a brake that applies a commanded torque. Measured are
+# the battery current and the rotational speed of the output shaft.
+#
+# This file describes the experiments of the task for the acceptance
+# (acceptance/bench.py). The measured traces are in data/<experiment>.csv.
+
+name = "task4"
+
+# Name of the model input. The delivered model declares it as
+# Modelica.Blocks.Interfaces.RealInput; here it is the commanded brake torque
+# at the output shaft in N m.
+input = "u"
+
+# Measured outputs, declared as Modelica.Blocks.Interfaces.RealOutput in the
+# delivered model, with the standard deviation of the additive Gaussian sensor
+# noise. The task text states the same values to the agent.
+[outputs]
+y_i = { unit = "A", noise = 0.5 }       # battery current
+y_w = { unit = "rad/s", noise = 0.2 }   # rotational speed of the output shaft
+
+# Each experiment starts from standstill with the circuit closed and runs for
+# stop_time seconds. The simulation reports the outputs on `intervals` equal
+# intervals, the grid on which the data were sampled. In this task the
+# experiments differ in length and sampling interval (0.02 s, 0.05 s, 0.5 s,
+# and 0.25 s for the test experiments). `source` declares the signal source
+# in Modelica, and `signal` is the source output that the bench connects to
+# the model input. The role says whether the agent may fit on the experiment
+# ("fit") or may only report its error on it ("validation").
+
+[experiments.exp1_fit]            # constant brake torque of 50 N m, run up from rest, 20 s
+role = "fit"
+stop_time = 20.0
+intervals = 1000
+source = ["Modelica.Blocks.Sources.Constant stimulus(k=50);"]
+signal = "stimulus.y"
+
+[experiments.exp2_fit]            # staircase of brake torque, 100, 300, 500, 200 N m for 30 s each
+role = "fit"
+stop_time = 120.0
+intervals = 2400
+source = ["Modelica.Blocks.Sources.TimeTable stimulus(table=[0,100; 30,100; 30,300; 60,300; 60,500; 90,500; 90,200; 120,200]);"]
+signal = "stimulus.y"
+
+[experiments.exp3_fit]            # long load profile, sinusoidal brake torque 400 +- 200 N m, period 300 s, 1800 s
+role = "fit"
+stop_time = 1800.0
+intervals = 3600
+source = ["Modelica.Blocks.Sources.Sine stimulus(amplitude=200, f=1/300.0, offset=400);"]
+signal = "stimulus.y"
+
+[experiments.exp4_validation]     # different load profile, brake torque 250, 550, 150, 450 N m, steps at 150, 400, 650 s
+role = "validation"
+stop_time = 900.0
+intervals = 1800
+source = ["Modelica.Blocks.Sources.TimeTable stimulus(table=[0,250; 150,250; 150,550; 400,550; 400,150; 650,150; 650,450; 900,450]);"]
+signal = "stimulus.y"
+
+# Test experiments. The agent never receives them; the client simulates
+# them to check a delivery beyond the experiments it was given. They stay
+# within the range of amplitudes and frequencies of the issued experiments,
+# and their data were simulated from the reference model with the noise
+# above, like the issued ones. The four tables were drawn at random from a
+# fixed seed and frozen before any delivery was simulated on them.
+
+[experiments.test_trapezoid]      # two trapezoidal pulses
+role = "test"
+stop_time = 300.0
+intervals = 1200
+source = ["Modelica.Blocks.Sources.Trapezoid stimulus(amplitude=300, offset=150, rising=20, width=40, falling=20, period=120, nperiod=2, startTime=10);"]
+signal = "stimulus.y"
+
+[experiments.test_steps]            # six steps to levels drawn at random within the issued range
+role = "test"
+stop_time = 300.0
+intervals = 1200
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_steps_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_ramps]            # eight ramps between levels drawn at random within the issued range
+role = "test"
+stop_time = 300.0
+intervals = 1200
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_ramps_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_chirp]            # linear chirp across the issued frequency band
+role = "test"
+stop_time = 300.0
+intervals = 1200
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_chirp_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+[experiments.test_twotone]          # sum of two sines at frequencies drawn at random within the issued band
+role = "test"
+stop_time = 300.0
+intervals = 1200
+source = ['Modelica.Blocks.Sources.CombiTimeTable stimulus(tableOnFile=true, tableName="u", fileName="{data}/test_twotone_u.txt", columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint);']
+signal = "stimulus.y[1]"
+
+# Quantities that the delivered model has to carry, with the values of the
+# reference model that generated the data, for the parameter layer
+# (acceptance/parameters.py). The experiments determine some quantities only
+# in combination, and the list holds these combinations: the series resistance
+# of battery and armature, and the inertia and damping of rotor and load
+# referred to the motor shaft through the reduction ratio of 5.2 that the task
+# text states (J_eq = J_rotor + J_load / 5.2^2, d_eq likewise; `ratio` names the
+# reduction ratio). `tolerance` is relative and five per cent.
+[parameters]
+R = { unit = "Ohm", reference = 0.5, tolerance = 0.05 }              # battery and armature resistance in series
+L_a = { unit = "H", reference = 0.042, tolerance = 0.05 }            # armature inductance
+k = { unit = "N.m/A", reference = 1.15, tolerance = 0.05 }           # torque constant
+J_eq = { unit = "kg.m2", reference = 0.191515, tolerance = 0.05, ratio = 5.2 }    # 0.014 + 4.8 / 5.2^2
+d_eq = { unit = "N.m.s/rad", reference = 0.015444, tolerance = 0.05, ratio = 5.2 } # 0.0025 + 0.35 / 5.2^2
+
+# The invariant layer (acceptance/invariant.py) checks the power balance at the
+# electromechanical converter on this experiment.
+[invariant]
+experiment = "exp1_fit"
