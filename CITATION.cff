@@ -21,3 +21,8 @@ preferred-citation:
       affiliation: Bochum University of Applied Sciences
       orcid: "https://orcid.org/0009-0000-1041-9559"
   year: 2026
+  url: "https://arxiv.org/abs/2610.25019"
+  identifiers:
+    - type: other
+      value: "arXiv:2610.25019"
+      description: arXiv preprint

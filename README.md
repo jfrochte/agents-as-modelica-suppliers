@@ -27,8 +27,9 @@ against the file. Part of V1 and all of V2 rest on a reading of the file that th
 client writes by hand, a short TOML file with the verdict on the library rule
 and which value in the file stands for which quantity of the device; without
 it these layers stay pending (`acceptance/README.md`). In our study the
-suppliers were LLM agents; the paper, a preprint on arXiv (link to follow),
-describes the study and the reasons behind each layer.
+suppliers were LLM agents; the paper, a preprint on arXiv
+([arXiv:2610.25019](https://arxiv.org/abs/2610.25019)), describes the study
+and the reasons behind each layer.
 
 ## What it looks like
 
